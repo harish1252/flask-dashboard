@@ -1,0 +1,137 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<h2>Welcome {{ current_user.email }}</h2>
+
+<h3>Total Expense: ₹{{ total }}</h3>
+
+<hr>
+
+<!-- MONTH FILTER -->
+<form method="GET" class="mb-3">
+    <input type="month" name="month"
+           class="form-control"
+           style="width:200px; display:inline;">
+    <button type="submit"
+            class="btn btn-primary btn-sm">
+        Filter
+    </button>
+</form>
+
+<hr>
+
+<!-- ADD EXPENSE FORM -->
+<form method="POST"
+      action="{{ url_for('add_expense') }}"
+      class="mb-4">
+    <div class="row">
+        <div class="col">
+            <input type="number" step="0.01"
+                   name="amount"
+                   placeholder="Amount"
+                   class="form-control"
+                   required>
+        </div>
+
+        <div class="col">
+            <input type="text"
+                   name="category"
+                   placeholder="Category"
+                   class="form-control"
+                   required>
+        </div>
+
+        <div class="col">
+            <input type="text"
+                   name="description"
+                   placeholder="Description"
+                   class="form-control">
+        </div>
+
+        <div class="col">
+            <button type="submit"
+                    class="btn btn-success">
+                Add Expense
+            </button>
+        </div>
+    </div>
+</form>
+
+<hr>
+
+<!-- EXPENSE TABLE -->
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>Amount</th>
+            <th>Category</th>
+            <th>Description</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for expense in expenses %}
+        <tr>
+            <td>₹{{ expense.amount }}</td>
+            <td>{{ expense.category }}</td>
+            <td>{{ expense.description }}</td>
+            <td>
+                <a href="{{ url_for('edit_expense', id=expense.id) }}"
+                   class="btn btn-warning btn-sm">
+                   Edit
+                </a>
+
+                <form action="{{ url_for('delete_expense', id=expense.id) }}"
+                      method="POST"
+                      style="display:inline;">
+                    <button type="submit"
+                            class="btn btn-danger btn-sm">
+                        Delete
+                    </button>
+                </form>
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+<hr>
+
+<!-- PIE CHART -->
+<hr>
+
+<h4>Category-wise Expense</h4>
+
+<div style="width: 400px; height: 400px; margin:auto;">
+    <canvas id="expenseChart"></canvas>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script>
+    const ctx = document.getElementById('expenseChart').getContext('2d');
+
+    new Chart(ctx, {
+        type: 'pie',
+        data: {
+            labels: {{ labels | safe }},
+            datasets: [{
+                data: {{ values | safe }},
+                backgroundColor: [
+                    'red',
+                    'blue',
+                    'green',
+                    'orange',
+                    'purple'
+                ]
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false
+        }
+    });
+</script>
+
+{% endblock %}
